@@ -1,8 +1,10 @@
-from fabric.api import env , run as myrun
-from fabric.operations import local as localrun
+from fabric.api import *
+from fabric.operations import put , get , local as localrun
+from fabric.context_managers import lcd
+from fabric.contrib.project import rsync_project
+from subprocess import call
 
 
-env.name = "local"
 
 def qa(action='start'):
     if action=='start' :
