@@ -20,7 +20,7 @@ services:
 
 
   web:
-      image: wordpress:5.0.3-php7.1-fpm-alpine
+      image: wordpress:5.0.3-php7.1-fpm
       restart: always
       links:
        - mysql
