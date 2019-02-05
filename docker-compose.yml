@@ -1,0 +1,71 @@
+version: '2'
+
+services:
+
+  nginx:
+    image: nginx
+    restart: always
+    volumes_from:
+      - volumes_source
+      - web
+      - volumes_data
+    volumes:
+        - ./dockers/etc/nginx/sites-enabled:/etc/nginx/sites-enabled
+        - ./dockers/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
+        #- ./dockers/etc/nginx/htpasswd.conf:/etc/nginx/.htpasswd
+    ports:
+       - "${HTTPPORT}:80"
+    links:
+       - web:phpfpm
+
+
+  web:
+      image: wordpress:5.0.3-php7.1-fpm-alpine
+      restart: always
+      links:
+       - mysql
+      environment:
+       - WORDPRESS_DB_PASSWORD=password
+       - WORDPRESS_DB_HOST:mysql
+      volumes_from:
+        - volumes_source
+        - volumes_data
+      volumes:
+        - ./dockers/etc/php/php.ini:/usr/local/etc/php/php.ini
+        #- ./dockers/etc/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
+        #- ${SRCDIR}/dockers/etc/php/run.sh:/run.sh
+      #entrypoint: /run.sh
+      command : php-fpm
+        
+      # ports:
+      #  - "${HTTPPORT}:${HTTPPORT}"
+      #command: php -S 0.0.0.0:${HTTPPORT} -d post_max_size=10M 
+  
+  mysql:
+      image: mysql:5.7
+      restart: always
+      volumes_from:
+        - volumes_data
+      environment:
+       - MYSQL_ROOT_PASSWORD=password
+       - MYSQL_DATABASE=wordpress
+
+
+### Sources directory ##############@
+  volumes_source:
+    image: tianon/true
+    volumes:
+      - ./:/var/www/html
+      #- ./themes:/var/www/html/wp-content/themes
+      - ./robots.txt:/var/www/html/robots.txt
+
+
+### Databases Data Container ################################
+
+  volumes_data:
+      image: tianon/true
+      volumes:
+          - ${DATADIR}/data/mysql:/var/lib/mysql
+          - ${DATADIR}/data/uploads:/var/www/html/wp-content/uploads
+
+### Add more Containers below ###############################
